@@ -34,7 +34,7 @@ def draw_main(self, context):
 
     # Enable OpenGL drawing
     bgl.glEnable(bgl.GL_BLEND)
-    bgl.glLineWidth(1)
+    bgl.glLineWidth(2)
 
     # Store reference to active object
     ob = context.object
@@ -52,10 +52,13 @@ def draw_main(self, context):
     if scene.gl_display_names:
         draw_name(context, ob, rgb_label, fsize)
 
+    obs = context.scene.objects
+    draw_distance_matrix(context, obs, rgb_line, rgb_label, fsize)
+
     # Disable OpenGL drawings and restore defaults
     bgl.glLineWidth(1)
     bgl.glDisable(bgl.GL_BLEND)
-    bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
+    bgl.glBlendColor(0.0, 0.0, 0.0, 1.0)
 
 
 class glrun(bpy.types.Operator):
@@ -105,10 +108,10 @@ class glrun(bpy.types.Operator):
 class glpanel(bpy.types.Panel):
     """Standard panel with scene variables"""
     
-    bl_idname = "glinfo.glpanel"
+    bl_idname = "GLINFO_PT_GLPANEL"
     bl_label = "Display Object Data"
     bl_space_type = 'VIEW_3D'
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI"
     bl_category = 'Drawing'
 
     def draw(self, context):
@@ -128,7 +131,8 @@ class glpanel(bpy.types.Panel):
 
         box.prop(scn, "gl_display_names", toggle=True, icon="OUTLINER_OB_FONT")
         box.prop(scn, "gl_display_verts", toggle=True, icon='DOT')
-        box.prop(scn, "gl_display_measure", toggle=True, icon="ALIGN")
+        # 2.93: TypeError: UILayout.prop(): error with keyword argument "icon" -  enum "ALIGN" not found 
+        box.prop(scn, "gl_display_measure", toggle=True, icon="PLUGIN")
         box.prop(scn, "gl_measure_indices")
 
     @classmethod
@@ -177,7 +181,7 @@ class glpanel(bpy.types.Panel):
 # Draw the name of the object on its origin
 def draw_name(context, ob, rgb_label, fsize):
     a = gl_pts(context, ob.location)
-    bgl.glColor4f(rgb_label[0], rgb_label[1], rgb_label[2], rgb_label[3])
+    bgl.glBlendColor(rgb_label[0], rgb_label[1], rgb_label[2], rgb_label[3])
     draw_text(a, ob.name, fsize)
 
 
@@ -196,10 +200,10 @@ def draw_measurement(context, ob, pts, rgb_line, rgb_label, fsize):
     b = gl_pts(context, b)
     mp = gl_pts(context, mp)
 
-    bgl.glColor4f(rgb_line[0], rgb_line[1], rgb_line[2], rgb_line[3])
+    bgl.glBlendColor(rgb_line[0], rgb_line[1], rgb_line[2], rgb_line[3])
     draw_line(a, b)
 
-    bgl.glColor4f(rgb_label[0], rgb_label[1], rgb_label[2], rgb_label[3])
+    bgl.glBlendColor(rgb_label[0], rgb_label[1], rgb_label[2], rgb_label[3])
     draw_text(mp, '%.3f' % d, fsize)
 
 
@@ -208,7 +212,7 @@ def label_verts(context, ob, rgb, fsize):
     try:
         # attempt get coordinates, will except if object does not have vertices
         v = coords(ob)
-        bgl.glColor4f(rgb[0], rgb[1], rgb[2], rgb[3])
+        bgl.glBlendColor(rgb[0], rgb[1], rgb[2], rgb[3])
         for i in range(0, len(v)):
             loc = gl_pts(context, v[i])
             draw_text(loc, str(i), fsize)
@@ -235,10 +239,11 @@ def draw_text(v, display_text, fsize, font_id=0):
 # Generic function for drawing line on screen
 def draw_line(v1, v2):
     if v1 and v2:
-        bgl.glBegin(bgl.GL_LINES)
-        bgl.glVertex2f(*v1)
-        bgl.glVertex2f(*v2)
-        bgl.glEnd()
+        # 2.93 api change, line still invisible...
+        bgl.glEnable(bgl.GL_LINES)
+        bgl.glVertexAttrib2f(0, *v1)
+        bgl.glVertexAttrib2f(1, *v2)
+        bgl.glDisable(bgl.GL_LINES)
     return
 
 
@@ -254,9 +259,9 @@ def coords(obj, ind=None, space='GLOBAL'):
 
     if space == 'GLOBAL':
         if isinstance(ind, int):
-            return (obj.matrix_world * v[ind].co).to_tuple()
+            return (obj.matrix_world @ v[ind].co).to_tuple()
         else:
-            return [(obj.matrix_world * v.co).to_tuple() for v in v]
+            return [(obj.matrix_world @ v.co).to_tuple() for v in v]
 
     elif space == 'LOCAL':
         if isinstance(ind, int):
@@ -272,6 +277,36 @@ def dist(x, y):
 def midpoint(x, y):
     return ((x[0] + y[0]) / 2, (x[1] + y[1]) / 2, (x[2] + y[2]) / 2)
 
+# Draws the distance between the origins of each object supplied
+def draw_distance_matrix(context, obs, rgb_line, rgb_label, fsize):
+
+    N = len(obs)
+    for j in range(0, N):
+        for i in range(j + 1, N):
+            a = obs[i].location
+            b = obs[j].location
+            d = dist(a, b)
+            mp = midpoint(a, b)
+
+            a_2d = gl_pts(context, a)
+            b_2d = gl_pts(context, b)
+            mp_2d = gl_pts(context, mp)
+
+            # 2.93 api change, glColor4f was not found.
+            bgl.glBlendColor(*rgb_line)
+            draw_line(a_2d, b_2d)
+
+            bgl.glBlendColor(*rgb_label)
+            draw_text(mp_2d, '%.3f' % d, fsize)
+
+            
+# Add this to draw_main() to draw between all selected objects:
+# obs = context.selected_objects
+# draw_distance_matrix(context, obs, rgb_line, rgb_label, fsize)
+
+# Add this to draw_main() to draw between all objects in scene:
+# obs = context.scene.objects
+# draw_distance_matrix(context, obs, rgb_line, rgb_label, fsize)
 
 ##### Registration #####
 def register():
@@ -303,11 +338,11 @@ def unregister():
     # interdependencies
 
     # Explicity unregister objects
-    # bpy.utils.unregister_class(glpanel)
-    # bpy.utils.unregister_class(glrun)
+    bpy.utils.unregister_class(glpanel)
+    bpy.utils.unregister_class(glrun)
 
     # Unregister objects inheriting bpy.types in current file and scope
-    bpy.utils.unregister_module(__name__)
+    # bpy.utils.unregister_module(__name__)
     print("%s unregister complete\n" % bl_info.get('name'))
 
 

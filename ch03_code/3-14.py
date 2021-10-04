@@ -1,18 +1,16 @@
-import ut
-import importlib
-importlib.reload(ut)
-
 import bpy
+ut = bpy.data.texts["ut_ch03.py"].as_module()
 
 from random import randint
 from math import floor
 
 # Must start in object mode
+bpy.ops.object.mode_set(mode='OBJECT')
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete()
 
 # Create a cube
-bpy.ops.mesh.primitive_cube_add(radius=0.5, location=(0, 0, 0))
+bpy.ops.mesh.primitive_cube_add(size=0.5, location=(0, 0, 0))
 bpy.context.object.name = 'Cube-1'
 
 bpy.ops.object.mode_set(mode='EDIT')
@@ -37,5 +35,5 @@ for i in range(0, 100):
     # Extrude the surface along it aggregate vertical normal
     bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate = 
           {"value": (0, 0, 1),
-           "constraint_axis": (True, True, True),
-           "constraint_orientation":'NORMAL'})
+           "constraint_axis": (True, True, True)})
+           #"constraint_orientation":'NORMAL'})

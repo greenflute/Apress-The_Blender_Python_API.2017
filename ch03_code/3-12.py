@@ -35,7 +35,7 @@ class act:
 
         if select_mode == 'VERT':
             if coords == 'GLOBAL':
-                [verts.append((world * v.co).to_tuple()) for v in bm.verts]
+                [verts.append((world @ v.co).to_tuple()) for v in bm.verts]
             elif coords == 'LOCAL':
                 [verts.append(v.co.to_tuple()) for v in bm.verts]
 
@@ -45,7 +45,7 @@ class act:
 
         if select_mode == 'EDGE':
             if coords == 'GLOBAL':
-                [verts.append([(world * v.co).to_tuple()
+                [verts.append([(world @ v.co).to_tuple()
                                for v in e.verts]) for e in bm.edges]
             elif coords == 'LOCAL':
                 [verts.append([v.co.to_tuple() for v in e.verts])
@@ -58,7 +58,7 @@ class act:
 
         if select_mode == 'FACE':
             if coords == 'GLOBAL':
-                [verts.append([(world * v.co).to_tuple()
+                [verts.append([(world @ v.co).to_tuple()
                                for v in f.verts]) for f in bm.faces]
             elif coords == 'LOCAL':
                 [verts.append([v.co.to_tuple() for v in f.verts])

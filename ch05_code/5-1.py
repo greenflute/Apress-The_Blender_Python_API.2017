@@ -59,8 +59,10 @@ class SimplePanel(bpy.types.Panel):
     bl_context = "objectmode"
 
     def draw(self, context):
+        # this cause Blender create a Button which action refers to SimpleOperator, linked by its bl_idname.
         self.layout.operator("object.simple_operator",
                              text="Print Encouraging Message")
+        # this will give us a text input, linked to the property registered by SimpleOperator's register method.
         self.layout.prop(context.scene, 'encouraging_message')
 
     @classmethod

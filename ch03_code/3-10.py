@@ -10,8 +10,9 @@ def coords(objName, space='GLOBAL'):
         v = obj.data.vertices
 
     if space == 'GLOBAL':
-        # Return T * L as list of tuples
-        return [(obj.matrix_world * v.co).to_tuple() for v in v]
+        # return [(obj.matrix_world * v.co).to_tuple() for v in v]
+        # "*" is for Blender <=2.79.9, after 2.8+ Blender uses "@"
+        return [(obj.matrix_world @ v.co).to_tuple() for v in v]
     elif space == 'LOCAL':
         # Return L as list of tuples
         return [v.co.to_tuple() for v in v]

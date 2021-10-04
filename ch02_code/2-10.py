@@ -1,4 +1,5 @@
-import ut
+import bpy
+ut = bpy.data.texts["ut.py"].as_module()
 import csv
 import urllib.request
 

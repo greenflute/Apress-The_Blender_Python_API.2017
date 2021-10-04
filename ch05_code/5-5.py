@@ -12,9 +12,8 @@ bl_info = {
 ### Use these imports to during development  ###
 
 ### Use these imports to during development  ###
-import ut
-import importlib
-importlib.reload(ut)
+import bpy
+ut = bpy.data.texts["ut.py"].as_module()
 
 ### Use these imports to package and ship your add-on ###
 # if "bpy" in locals():
@@ -97,9 +96,11 @@ class xyzSelect(bpy.types.Operator):
 # Simple button in Tools panel
 class xyzPanel(bpy.types.Panel):
     bl_space_type = "VIEW_3D"
-    bl_region_type = "TOOLS"
+    bl_region_type = "UI"
     bl_category = "XYZ-Select"
-    bl_label = "Select by Bounding Box"
+    bl_label = "XYZ-Select"
+    # otherwise cause error: 警告: 'xyzPanel' 不包含带有前缀和后缀的 '_PT_', see 5-5.png for location 
+    bl_idname = "XYZ_PT_Select"
 
     @classmethod
     def poll(self, context):
@@ -133,10 +134,10 @@ def register():
 
 
 def unregister():
-    # bpy.utils.unregister_class(xyzPanel)
-    # bpy.utils.unregister_class(xyzSelect)
+    bpy.utils.unregister_class(xyzPanel)
+    bpy.utils.unregister_class(xyzSelect)
 
-    bpy.utils.unregister_module(__name__)
+    # bpy.utils.unregister_module(__name__)
     print("%s unregister complete\n" % bl_info.get('name'))
 
 

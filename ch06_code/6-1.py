@@ -15,4 +15,6 @@ def tell_time(dummy):
     bpy.data.objects['MyTextObj'].data.body = current_time
    
 # Add to the list of handler functions "scene_update_pre"
-bpy.app.handlers.scene_update_pre.append(tell_time)
+# bpy.app.handlers.scene_update_pre.append(tell_time)
+# 2.93 API update, but the clock only updates when click in the viewport or mode change, but not by simple view rotation.
+bpy.app.handlers.depsgraph_update_pre.append(tell_time)

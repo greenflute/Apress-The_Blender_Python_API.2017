@@ -1,3 +1,5 @@
+import bpy
+
 # Returns bpy.data.objects datablock
 bpy.context.object
 
@@ -5,5 +7,5 @@ bpy.context.object
 bpy.context.active_object
 
 # Accessing the 'name' and 'location' values of the datablock
-bpy.context.object.name
-bpy.context.object.location
+print(bpy.context.object.name)
+print(bpy.context.object.location)

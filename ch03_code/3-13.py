@@ -1,15 +1,12 @@
-import ut
-import importlib
-importlib.reload(ut)
-
 import bpy
+ut = bpy.data.texts["ut_ch03.py"].as_module()
 
 # Will fail if scene is empty
 bpy.ops.object.mode_set(mode='OBJECT')
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete()
 
-bpy.ops.mesh.primitive_uv_sphere_add(size=0.5, location=(0, 0, 0))
+bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, location=(0, 0, 0))
 bpy.ops.transform.resize(value = (5, 5, 5))
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')

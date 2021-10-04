@@ -7,7 +7,7 @@ bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete()
 
 # Create a cube and enter Edit Mode
-bpy.ops.mesh.primitive_cube_add(radius=1, location=(0, 0, 0))
+bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 0))
 bpy.ops.object.mode_set(mode='EDIT')
 
 # Set to "Face Mode" for easier visualization

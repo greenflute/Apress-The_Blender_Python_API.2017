@@ -8,7 +8,7 @@ bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete()
 
 # Create cube
-bpy.ops.mesh.primitive_cube_add(radius=1, location=(0, 0, 0))
+bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 0))
 
 bpy.ops.object.mode_set(mode='EDIT')
 
@@ -18,7 +18,7 @@ material_obj = bpy.data.materials.new('number_1_material')
 
 ### Begin configure the number one ###
 # Path to image
-imgpath = '/home/cconlan/Desktop/blender-book/ch08_pics/number_1.png'
+imgpath = '/Users/ZLF/Workspaces/apress.com_exfiles/Apress-The_Blender_Python_API.2017/ch08_code/number_1.png'
 image_obj = bpy.data.images.load(imgpath)
 
 # Create image texture from image
@@ -26,13 +26,19 @@ texture_obj = bpy.data.textures.new('number_1_tex', type='IMAGE')
 texture_obj.image = image_obj
 
 # Add texture slot for image texture
-texture_slot = material_obj.texture_slots.add()
-texture_slot.texture = texture_obj
+# texture_slot = material_obj.texture_slots.add()
+# texture_slot.texture = texture_obj
+# 2.93 api change, material_obj.texture_slots.add() was removed since 2.8
+material_obj.use_nodes = True
+bsdf = material_obj.node_tree.nodes["Principled BSDF"]
+texImage = material_obj.node_tree.nodes.new('ShaderNodeTexImage')
+texImage.image = image_obj
+material_obj.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
 
 
 ### Begin configuring the number two ###
 # Path to image
-imgpath = '/home/cconlan/Desktop/blender-book/ch08_pics/number_2.png'
+imgpath = '/Users/ZLF/Workspaces/apress.com_exfiles/Apress-The_Blender_Python_API.2017/ch08_code/number_2.png'
 image_obj = bpy.data.images.load(imgpath)
 
 # Create image texture from image
@@ -40,13 +46,19 @@ texture_obj = bpy.data.textures.new('number_2_tex', type='IMAGE')
 texture_obj.image = image_obj
 
 # Add texture slot for image texture
-texture_slot = material_obj.texture_slots.add()
-texture_slot.texture = texture_obj
+# texture_slot = material_obj.texture_slots.add()
+# texture_slot.texture = texture_obj
+# 2.93 api change, material_obj.texture_slots.add() was removed since 2.8
+material_obj.use_nodes = True
+bsdf = material_obj.node_tree.nodes["Principled BSDF"]
+texImage = material_obj.node_tree.nodes.new('ShaderNodeTexImage')
+texImage.image = image_obj
+material_obj.node_tree.links.new(bsdf.inputs['Base Color'], texImage.outputs['Color'])
 
 # Tone down color map, turn on and tone up normal mapping
-texture_slot.diffuse_color_factor = 0.2
-texture_slot.use_map_normal = True
-texture_slot.normal_factor = 2.0
+# texture_slot.diffuse_color_factor = 0.2
+# texture_slot.use_map_normal = True
+# texture_slot.normal_factor = 2.0
 
 
 ### Finish configuring textures ###
@@ -95,7 +107,9 @@ uv_data.y = 0.0
 
 
 # Change background color to white to match our example
-bpy.data.worlds['World'].horizon_color = Color((1.0, 1.0, 1.0))
+# bpy.data.worlds['World'].horizon_color = Color((1.0, 1.0, 1.0))
+# 2.93 api change
+bpy.data.worlds['World'].color = Color((1.0, 1.0, 1.0))
 
 # Switch to object mode to add lights
 bpy.ops.object.mode_set(mode='OBJECT')
@@ -106,6 +120,8 @@ for side in [-1, 1]:
     for coord in [0, 1, 2]:
         loc = [0, 0, 0]
         loc[coord] = side * dist
-        bpy.ops.object.lamp_add(type='POINT', location=loc)
+        # bpy.ops.object.lamp_add(type='POINT', location=loc)
+        # 2.93 api change
+        bpy.ops.object.light_add(type='POINT', location=loc)
 
 # Switch to rendered mode to view results
